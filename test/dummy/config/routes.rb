@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  mount SolidStorage::Engine => "/solid_storage"
+  mount SolidStorage::Engine => "/"
 end
