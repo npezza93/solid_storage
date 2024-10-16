@@ -2,9 +2,15 @@ require "active_storage/service"
 
 module ActiveStorage
   class Service::SolidStorageService < ::ActiveStorage::Service
+    def find(key)
+      SolidStorage::File.find_by!(key:)
+    end
+
     def upload(key, io, checksum: nil, **)
       instrument(:upload, key:, checksum:) do
-        SolidStorage::File.create!(key:, data: io.read)
+        file = SolidStorage::File.create!(key:, data: io.read)
+        ensure_integrity_of(key, checksum) if checksum
+        file
       end
     end
 
@@ -108,6 +114,13 @@ module ActiveStorage
 
     def url_options
       ActiveStorage::Current.url_options
+    end
+
+    def ensure_integrity_of(key, checksum)
+      unless OpenSSL::Digest::MD5.file(find(key)).base64digest == checksum
+        delete key
+        raise ActiveStorage::IntegrityError
+      end
     end
   end
 end
