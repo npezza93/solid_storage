@@ -15,11 +15,15 @@ module ActiveStorage
     end
 
     def download(key, &block)
-      data = SolidStorage::File.find_by!(key:).data
+      io = SolidStorage::File.find_by!(key:).io
       if block
-        instrument(:streaming_download, key:) { yield data }
+        instrument(:streaming_download, key:) do
+          while data = io.read(5.megabytes)
+            yield data
+          end
+        end
       else
-        instrument(:download, key:) { data }
+        instrument(:download, key:) { io.read }
       end
     rescue ActiveRecord::RecordNotFound
       raise ActiveStorage::FileNotFoundError
@@ -28,20 +32,22 @@ module ActiveStorage
     def download_chunk(key, range)
       instrument(:download_chunk, key:, range:) do
         args =
-          if sqlite? then "data, #{range.begin}, #{range.size}"
+          if sqlite? then "data, #{range.begin + 1}, #{range.size}"
           else
            "data FROM #{range.begin} FOR #{range.size}"
           end
 
         SolidStorage::File.select("SUBSTRING(#{args}) as chunk").
           find_by!(key:).chunk
+      rescue ActiveRecord::RecordNotFound
+        raise ActiveStorage::FileNotFoundError
       end
     end
 
     def compose(source_keys, destination_key, **)
       SolidStorage::File.create(
         key: destination_key,
-        data: SolidStorage::File.where(key: source_keys).map(&:data).join
+        data: SolidStorage::File.where(key: source_keys).in_order_of(:key, source_keys).map(&:data).join
       )
     end
 
@@ -68,10 +74,14 @@ module ActiveStorage
             service_name: name }, expires_in:, purpose: :blob_token
         )
 
-        payload[:url] = url_helpers.solid_storage.update_rails_url(
+        payload[:url] = url_helpers.update_rails_solid_storage_service_url(
           verified_token_with_expiration, url_options
         )
       end
+    end
+
+    def headers_for_direct_upload(key, content_type:, **)
+      { "Content-Type" => content_type }
     end
 
     private
@@ -91,10 +101,10 @@ module ActiveStorage
           purpose: :blob_key)
 
       if url_options.blank?
-        raise ArgumentError, "Cannot generate URL for #{filename} using Disk service, please set ActiveStorage::Current.url_options."
+        raise ArgumentError, "Cannot generate URL for #{filename} using Solid Storage, please set ActiveStorage::Current.url_options."
       end
 
-      url_helpers.solid_storage.rails_service_url(verified_key_with_expiration, filename: filename, **url_options)
+      url_helpers.rails_solid_storage_service_url(verified_key_with_expiration, filename: filename, **url_options)
     end
 
     def generate_key(key:, expires_in:, filename:, content_type:, disposition:, purpose:)
@@ -117,7 +127,7 @@ module ActiveStorage
     end
 
     def ensure_integrity_of(key, checksum)
-      unless OpenSSL::Digest::MD5.file(find(key)).base64digest == checksum
+      unless OpenSSL::Digest::MD5.base64digest(find(key).data) == checksum
         delete key
         raise ActiveStorage::IntegrityError
       end
