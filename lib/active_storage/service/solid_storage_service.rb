@@ -34,7 +34,7 @@ module ActiveStorage
         args =
           if sqlite? then "data, #{range.begin + 1}, #{range.size}"
           else
-           "data FROM #{range.begin} FOR #{range.size}"
+           "data FROM #{range.begin + 1} FOR #{range.size}"
           end
 
         SolidStorage::File.select("SUBSTRING(#{args}) as chunk").
