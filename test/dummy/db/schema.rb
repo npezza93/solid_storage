@@ -40,7 +40,7 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_16_013343) do
   end
 
   create_table "solid_storage_files", force: :cascade do |t|
-    t.binary "data"
+    t.binary "data", limit: 536870912
     t.string "key"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
