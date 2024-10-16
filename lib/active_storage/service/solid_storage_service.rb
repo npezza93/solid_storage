@@ -53,7 +53,9 @@ module ActiveStorage
 
     def delete_prefixed(prefix)
       instrument :delete_prefixed, prefix: do
-        SolidStorage::File.where("key LIKE ?", "#{prefix}%").destroy_all
+        SolidStorage::File.where(
+          SolidStorage::File.arel_table[:key].matches("#{prefix}%").to_sql
+        ).destroy_all
       end
     end
 
