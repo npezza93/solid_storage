@@ -7,12 +7,12 @@ service contract.
 ## Why?
 
 S3, Azure, R2, GCS all cost money. When starting out and trying to keep costs
-low storing files in the database is just fine. So why not just use the disk
+low, storing files in the database is just fine. So why not just use the disk
 adapter? The disk adapter only works if you are on a single server, and if you
 are on a single server, the disk adapter can be cumbersome to backup. With
 data in the database, it is easy to backup by incorporating into your current
-database backup process. Having your files easily backup-able it also makes your
-app more portable. Solid Storage also uses X-Sendfile just like the disk
+database backup process. Having your files easily backup-able will also make
+your app more portable. Solid Storage also uses X-Sendfile just like the disk
 adapter so you get all the upside of the disk adapter.
 
 ## Installation
