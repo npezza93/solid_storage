@@ -4,6 +4,16 @@ Solid Storage is an Active Storage service adapter that stores blobs in the
 database and serves them using X-Sendfile and adheres to the Active Storage
 service contract.
 
+## Why?
+
+S3, Azure, R2, GCS all cost money. When starting out and trying to keep costs
+low storing files in the database is just fine. So why not just use the disk
+adapter? The disk adapter only works if you are on a single server, and if you
+are on a single server, the disk adapter can be cumbersome to backup. With
+data in the database, it is easy to backup and make your portal. Solid Storage
+also uses X-Sendfile just like the disk adapter so you get all the upside of the
+disk adapter.
+
 ## Installation
 
 1. `bundle add solid_storage`
