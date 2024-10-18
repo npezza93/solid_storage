@@ -1,10 +1,12 @@
 # frozen_string_literal: true
 
 class SolidStorage::FilesController < ActiveStorage::DiskController
+  include ActiveStorage::FileServer
+
   def show
     if key = decode_verified_key
       @file = named_disk_service(key[:service_name]).find(key[:key])
-      serve_file @file, content_type: key[:content_type],
+      serve_file @file.tempfile, content_type: key[:content_type],
         disposition: key[:disposition]
     else
       head :not_found
@@ -25,14 +27,5 @@ class SolidStorage::FilesController < ActiveStorage::DiskController
     end
   rescue ActiveStorage::IntegrityError
     head :unprocessable_entity
-  end
-
-  private
-
-  def serve_file(file, content_type:, disposition:)
-    send_file file.tempfile,
-      type: content_type || DEFAULT_SEND_FILE_TYPE,
-      disposition: disposition || DEFAULT_SEND_FILE_DISPOSITION,
-      file_name: params[:filename]
   end
 end

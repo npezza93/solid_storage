@@ -14,4 +14,3 @@ AllCops:
     - test/dummy/**/*
     - bench/**/*
     - lib/generators/**/*_schema.rb
-  TargetRubyVersion: 3.3

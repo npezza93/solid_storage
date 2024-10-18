@@ -13,5 +13,6 @@ gem "sqlite3"
 gem "trilogy"
 
 gem "thruster"
+gem "image_processing"
 
 gem "rubocop-rails-omakase"

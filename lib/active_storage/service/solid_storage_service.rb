@@ -2,6 +2,10 @@ require "active_storage/service"
 
 module ActiveStorage
   class Service::SolidStorageService < ::ActiveStorage::Service
+    def initialize(public: false, **options)
+      @public = public
+    end
+
     def find(key)
       SolidStorage::File.find_by!(key:)
     end
@@ -99,7 +103,7 @@ module ActiveStorage
     def generate_url(key, expires_in:, filename:, content_type:, disposition:)
       content_disposition = content_disposition_with(type: disposition, filename:)
       verified_key_with_expiration =
-        generate_key(key:, expires_in:, filename:, content_type: content_disposition, disposition:,
+        generate_key(key:, expires_in:, filename:, content_type: content_type, disposition: content_disposition,
           purpose: :blob_key)
 
       if url_options.blank?
@@ -117,7 +121,7 @@ module ActiveStorage
     end
 
     def sqlite?
-      SolidStorage::File.connection.adapter_name == "SQLite"
+      SolidStorage::File.connection.adapter_name.downcase.inquiry.sqlite?
     end
 
     def url_helpers
@@ -129,10 +133,10 @@ module ActiveStorage
     end
 
     def ensure_integrity_of(key, checksum)
-      unless OpenSSL::Digest::MD5.base64digest(find(key).data) == checksum
-        delete key
-        raise ActiveStorage::IntegrityError
-      end
+      return if OpenSSL::Digest::MD5.base64digest(find(key).data) == checksum
+
+      delete key
+      raise ActiveStorage::IntegrityError
     end
   end
 end
