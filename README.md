@@ -1,7 +1,8 @@
 # Solid Storage
 
-Active Storage service adapter that stores blobs in the database and serves
-them using X-Sendfile and adheres to the Active Storage service contract.
+Solid Storage is an Active Storage service adapter that stores blobs in the
+database and serves them using X-Sendfile and adheres to the Active Storage
+service contract.
 
 ## Installation
 
@@ -44,7 +45,7 @@ It's also recommended to move Active Storage models into the `storage` database
 as well by adding an initializer:
 ```ruby
 ActiveSupport.on_load(:active_storage_record) do
-    connects_to(database: { writing: :storage })
+  connects_to(database: { writing: :storage })
 end
 ```
 
