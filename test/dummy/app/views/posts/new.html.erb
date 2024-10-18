@@ -2,3 +2,8 @@
   <%= f.file_field :file %>
   <%= f.submit %>
 <% end %>
+<hr>
+<%= form_with model: @post do |f| %>
+  <%= f.file_field :file, direct_upload: true %>
+  <%= f.submit %>
+<% end %>
