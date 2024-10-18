@@ -12,4 +12,6 @@ gem "pg"
 gem "sqlite3"
 gem "trilogy"
 
+gem "thruster"
+
 gem "rubocop-rails-omakase"

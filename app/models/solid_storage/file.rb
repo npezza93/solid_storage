@@ -4,7 +4,9 @@ class SolidStorage::File < SolidStorage::Record
 
   def tempfile
     @tempfile ||= Tempfile.new.tap do |file|
+      file.binmode
       file.write(data)
+      file.rewind
     end
   end
 

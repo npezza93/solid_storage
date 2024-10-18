@@ -39,6 +39,8 @@ ActiveRecord::Schema[7.2].define(version: 2024_10_16_013343) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "posts", force: :cascade
+
   create_table "solid_storage_files", force: :cascade do |t|
     t.binary "data", limit: 536870912
     t.string "key"

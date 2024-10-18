@@ -9,8 +9,6 @@ class SolidStorage::FilesController < ActiveStorage::DiskController
     else
       head :not_found
     end
-  ensure
-    @file&.tempfile.unlink
   end
 
   def update
@@ -32,17 +30,9 @@ class SolidStorage::FilesController < ActiveStorage::DiskController
   private
 
   def serve_file(file, content_type:, disposition:)
-    ::Rack::Files.new(nil).serving(request, file.tempfile.path).tap do |(status, headers, body)|
-      self.status = status
-      self.response_body = body
-
-      headers.each do |name, value|
-        response.headers[name] = value
-      end
-
-      response.headers.except!("X-Cascade", "x-cascade") if status == 416
-      response.headers["Content-Type"] = content_type || DEFAULT_SEND_FILE_TYPE
-      response.headers["Content-Disposition"] = disposition || DEFAULT_SEND_FILE_DISPOSITION
-    end
+    send_file file.tempfile,
+      type: content_type || DEFAULT_SEND_FILE_TYPE,
+      disposition: disposition || DEFAULT_SEND_FILE_DISPOSITION,
+      file_name: params[:filename]
   end
 end
