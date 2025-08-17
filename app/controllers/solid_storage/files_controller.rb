@@ -5,7 +5,9 @@ class SolidStorage::FilesController < ActiveStorage::DiskController
 
   def show
     if key = decode_verified_key
-      @file = named_disk_service(key[:service_name]).find(key[:key])
+      service = named_disk_service(key[:service_name])
+      @file = service.find(key[:key])
+      response.headers["Cache-Control"] = service.cache_control if service.cache_control
       serve_file @file.tempfile, content_type: key[:content_type],
         disposition: key[:disposition]
     else

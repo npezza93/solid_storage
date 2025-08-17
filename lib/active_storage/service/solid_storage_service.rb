@@ -2,9 +2,12 @@ require "active_storage/service"
 
 module ActiveStorage
   class Service::SolidStorageService < ::ActiveStorage::Service
-    def initialize(public: false, **options)
+    def initialize(public: false, cache_control: nil, **options)
       @public = public
+      @cache_control = cache_control
     end
+
+    attr_reader :cache_control
 
     def find(key)
       SolidStorage::File.find_by!(key:)
